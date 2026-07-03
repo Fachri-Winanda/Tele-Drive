@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeleDrive by FachriWinanda</title>
+    <style>
+        :root {
+            --bg: #0f1419;
+            --card: #1a232e;
+            --primary: #0088cc;
+            --text: #e1e8ed;
+            --text-muted: #8899a6;
+            --border: #2f3b47;
+            --success: #00ba7c;
+            --danger: #f4212e;
+            --warning: #ffad1f;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            gap: 20px;
+        }
+
+        header {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-title {
+            font-size: 24px;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .logo-subtitle {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px;
+            letter-spacing: 0.5px;
+        }
+
+        .logo span { color: var(--primary); }
+
+        .stats {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        #userEmail { color: #00c8ff; font-weight: 600; }
+
+        .sidebar {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 20px;
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        .sidebar h3 {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        .folder-list { list-style: none; }
+
+        .folder-item {
+            padding: 10px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 4px;
+            transition: 0.2s;
+        }
+
+        .folder-item:hover, .folder-item.active {
+            background: var(--border);
+        }
+
+        .folder-item.active {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .main-content { display: flex; flex-direction: column; gap: 20px; }
+
+        .toolbar { display: flex; gap: 12px; align-items: center; }
+
+        .search-box {
+            flex: 1;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 12px 12px 40px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 15px;
+        }
+
+        .search-box svg {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-secondary { background: var(--border); }
+        .btn-danger { background: var(--danger); }
+
+        .upload-area {
+            background: var(--card);
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .upload-area:hover, .upload-area.dragover {
+            border-color: var(--primary);
+            background: #1e2936;
+        }
+
+        .folder-input {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .folder-input input {
+            padding: 8px 12px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            width: 200px;
+        }
+
+        .progress-container { display: none; margin-top: 20px; }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .file-list {
+            background: var(--card);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .file-list-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            gap: 15px;
+        }
+
+        .file-item:hover { background: #1e2936; }
+        .file-item.selected { background: rgba(0, 136, 204, 0.1); }
+
+        .checkbox { width: 20px; height: 20px; cursor: pointer; }
+
+        .file-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 12px;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .file-info { flex: 1; }
+        .file-name { font-weight: 600; margin-bottom: 4px; }
+        .file-meta {
+            font-size: 13px;
+            color: var(--text-muted);
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            background: var(--border);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .file-actions { display: flex; gap: 8px; }
+
+        .icon-btn {
+            background: var(--border);
+            border: none;
+            color: var(--text);
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .icon-btn:hover { background: var(--primary); }
+        .icon-btn.delete:hover { background: var(--danger); }
+
+        .empty-state {
+            padding: 60px 20px;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        .config {
+            background: var(--card);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            grid-column: 1 / -1;
+        }
+
+        .config input {
+            width: 100%;
+            padding: 10px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            margin: 8px 0;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--success);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            display: none;
+            z-index: 1000;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.9);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-content, .preview-modal {
+            background: var(--card);
+            padding: 24px;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .preview-modal {
+            max-width: 90vw;
+            max-height: 90vh;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .preview-body {
+            flex: 1;
+            overflow: auto;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg);
+        }
+
+        .preview-body img {
+            max-width: 100%;
+            max-height: 70vh;
+            object-fit: contain;
+        }
+
+        .preview-body iframe {
+            width: 100%;
+            height: 70vh;
+            border: none;
+            border-radius: 8px;
+        }
+
+        #fileInput { display: none; }
+
+        @media (max-width: 968px) {
+            .container { grid-template-columns: 1fr; }
+            .sidebar { position: static; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <header>
+        <div class="logo">
+            <div>
+                <div class="logo-title">📁 Tele<span>Drive</span></div>
+                <div class="logo-subtitle">by FachriWinanda v.1.1</div>
+            </div>
+        </div>
+
+        <div class="stats">
+            <span id="userEmail"></span>
+            <span id="fileCount">0 file</span>
+            <span id="totalSize">0 MB</span>
+            <button class="btn btn-danger" onclick="logout()">Logout</button>
+        </div>
+    </header>
+
+    <div class="config" id="configBox">
+        <h3>Setup Bot Telegram</h3>
+        <input type="text" id="botToken" placeholder="Bot Token: 123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11">
+        <input type="text" id="chatId" placeholder="Chat ID: 123456789">
+        <button class="btn" onclick="saveConfig()">Simpan Config</button>
+    </div>
+
+    <aside class="sidebar">
+        <h3>Folder</h3>
+        <ul class="folder-list" id="folderList"></ul>
+    </aside>
+
+    <main class="main-content">
+        <div class="toolbar">
+            <div class="search-box">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+                <input type="text" id="searchInput" placeholder="Cari nama file..." oninput="filterFiles()">
+            </div>
+            <button class="btn" onclick="document.getElementById('fileInput').click()">
+                + Upload File
+            </button>
+        </div>
+
+        <div class="upload-area" id="uploadArea">
+            <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            <h3>Drag & drop file ke sini</h3>
+            <p>Atau klik tombol Upload. Max 50MB per file</p>
+
+            <div class="folder-input">
+                <span style="color: var(--text-muted)">Folder:</span>
+                <input type="text" id="folderInput" placeholder="kerja, foto, tugas (tanpa #)">
+            </div>
+
+            <input type="file" id="fileInput" multiple>
+
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <p id="progressText">Uploading...</p>
+            </div>
+        </div>
+
+        <div class="file-list">
+            <div class="file-list-header">
+                <div class="breadcrumb">
+                    <input type="checkbox" id="selectAll" onchange="toggleSelectAll()">
+                    <label for="selectAll" style="margin-left: 8px;">Folder: <span id="currentFolder">Semua File</span></label>
+                </div>
+                <div class="bulk-actions" id="bulkActions">
+                    <span id="selectedCount">0 dipilih</span>
+                    <button class="btn btn-danger" onclick="bulkDelete()">Hapus</button>
+                </div>
+                <button class="icon-btn" onclick="loadFiles()" title="Refresh">↻</button>
+            </div>
+            <div id="fileListContent">
+                <div class="empty-state">Belum ada file. Upload file pertama kamu!</div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Share Modal -->
+<div class="modal" id="shareModal">
+    <div class="modal-content">
+        <h3>Share Link</h3>
+        <input type="text" id="shareLink" readonly>
+        <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px;">
+            <button class="btn btn-secondary" onclick="closeModal('shareModal')">Tutup</button>
+            <button class="btn" onclick="copyLink()">Copy Link</button>
+        </div>
+    </div>
+</div>
+
+<!-- Preview Modal -->
+<div class="modal" id="previewModal">
+    <div class="preview-modal">
+        <div class="preview-header">
+            <h3 id="previewTitle">Preview</h3>
+            <button class="icon-btn" onclick="closeModal('previewModal')">✕</button>
+        </div>
+        <div class="preview-body" id="previewBody">Loading...</div>
+        <div class="preview-actions">
+            <button class="btn btn-secondary" onclick="closeModal('previewModal')">Tutup</button>
+            <button class="btn" id="previewDownloadBtn">Download</button>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+    import {
+        getFirestore, collection, addDoc, getDocs, deleteDoc, doc, setDoc, getDoc
+    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCVu0ga_ZuOX6XD1ywCchAyOeJDpQwWPMg",
+        authDomain: "telecloud-67e66.firebaseapp.com",
+        projectId: "telecloud-67e66",
+        storageBucket: "telecloud-67e66.firebasestorage.app",
+        messagingSenderId: "1098831073879",
+        appId: "1:1098831073879:web:8f398990c31b08ca228912"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    let BOT_TOKEN = "";
+    let CHAT_ID = "";
+    let files = [];
+    let currentFolder = 'all';
+    let searchQuery = '';
+    let selectedFiles = new Set();
+    let currentUser = null;
+
+    // Logout
+    window.logout = async () => {
+        if (confirm("Yakin ingin logout?")) {
+            await signOut(auth);
+            window.location.href = "login.html";
+        }
+    };
+
+    // Auth State
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+            window.location.href = "login.html";
+            return;
+        }
+        currentUser = user;
+        document.getElementById("userEmail").textContent = user.email;
+
+        const configDoc = await getDoc(doc(db, "users", user.uid));
+        if (configDoc.exists()) {
+            BOT_TOKEN = configDoc.data().botToken;
+            CHAT_ID = configDoc.data().chatId;
+            document.getElementById("botToken").value = BOT_TOKEN;
+            document.getElementById("chatId").value = CHAT_ID;
+            document.getElementById("configBox").style.display = "none";
+        } else {
+            document.getElementById("configBox").style.display = "block";
+        }
+        loadFilesFromFirestore();
+    });
+
+    async function saveConfig() {
+        BOT_TOKEN = document.getElementById("botToken").value.trim();
+        CHAT_ID = document.getElementById("chatId").value.trim();
+
+        if (!BOT_TOKEN || !CHAT_ID) {
+            showToast("Token dan Chat ID wajib diisi", "danger");
+            return;
+        }
+
+        const user = auth.currentUser;
+        await setDoc(doc(db, "users", user.uid), { botToken: BOT_TOKEN, chatId: CHAT_ID });
+        document.getElementById("configBox").style.display = "none";
+        showToast("Config berhasil disimpan");
+    }
+
+    // GANTI SEMUA loadFilesFromFirestore() dengan yang baru ini
+async function loadFilesFromFirestore() {
+    if (!currentUser) return;
+    
+    files = [];
+    const userFilesRef = collection(db, "users", currentUser.uid, "files");
+    
+    const snapshot = await getDocs(userFilesRef);
+    snapshot.forEach((docSnap) => {
+        files.push({ id: docSnap.id, ...docSnap.data() });
+    });
+    
+    renderFolders();
+    renderFiles();
+}
+
+    function renderFolders() {
+        const folders = [...new Set(files.map(f => f.folder).filter(Boolean))];
+        const folderList = document.getElementById('folderList');
+        folderList.innerHTML = `
+            <li class="folder-item ${currentFolder === 'all' ? 'active' : ''}" data-folder="all" onclick="selectFolder('all')">
+                <svg width="18" height="18" fill="currentColor"><path d="M3 3h6l2 2h6v10H3z"/></svg>
+                Semua File
+            </li>
+            ${folders.map(folder => `
+                <li class="folder-item ${currentFolder === folder ? 'active' : ''}" data-folder="${folder}" onclick="selectFolder('${folder}')">
+                    <svg width="18" height="18" fill="currentColor"><path d="M3 3h6l2 2h6v10H3z"/></svg>
+                    #${folder}
+                </li>
+            `).join('')}
+        `;
+    }
+
+    function selectFolder(folder) {
+        currentFolder = folder;
+        selectedFiles.clear();
+        updateBulkActions();
+        document.getElementById('currentFolder').textContent = folder === 'all' ? 'Semua File' : `#${folder}`;
+        renderFolders();
+        renderFiles();
+    }
+
+    // Drag & Drop + Upload
+    const uploadArea = document.getElementById('uploadArea');
+    uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+    uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+    uploadArea.addEventListener('drop', e => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        handleFiles(e.dataTransfer.files);
+    });
+
+    document.getElementById('fileInput').addEventListener('change', e => handleFiles(e.target.files));
+
+    async function handleFiles(fileList) {
+        if (!BOT_TOKEN || !CHAT_ID) {
+            showToast('Setup Bot Token dan Chat ID dulu!', 'danger');
+            document.getElementById('configBox').style.display = 'block';
+            return;
+        }
+
+        const folder = document.getElementById('folderInput').value.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+        for (let file of fileList) {
+            if (file.size > 50 * 1024 * 1024) {
+                showToast(`${file.name} terlalu besar. Max 50MB`, 'danger');
+                continue;
+            }
+            await uploadFile(file, folder);
+        }
+        document.getElementById('folderInput').value = '';
+    }
+
+    async function uploadFile(file, folder) {
+        const formData = new FormData();
+        formData.append('chat_id', CHAT_ID);
+        formData.append('document', file);
+        if (folder) formData.append('caption', `#${folder}`);
+
+        const progressContainer = document.getElementById('progressContainer');
+        const progressFill = document.getElementById('progressFill');
+        const progressText = document.getElementById('progressText');
+
+        progressContainer.style.display = 'block';
+        progressText.textContent = `Uploading ${file.name}...`;
+
+        try {
+            const xhr = new XMLHttpRequest();
+            xhr.upload.addEventListener('progress', e => {
+                if (e.lengthComputable) {
+                    const percent = (e.loaded / e.total) * 100;
+                    progressFill.style.width = percent + '%';
+                }
+            });
+
+            xhr.onload = async () => {
+                if (xhr.status === 200) {
+                    const result = JSON.parse(xhr.responseText);
+                    if (result.ok) {
+                        const fileData = {
+                            name: file.name,
+                            size: file.size,
+                            type: file.type,
+                            file_id: result.result.document.file_id,
+                            folder: folder || null,
+                            date: new Date().toISOString()
+                        };
+                        const userFilesRef = collection(db, "users", currentUser.uid, "files");
+                        await addDoc(userFilesRef, fileData);
+                        await loadFilesFromFirestore();
+                        showToast('File berhasil diupload!');
+                        setTimeout(() => {
+                            progressContainer.style.display = 'none';
+                            progressFill.style.width = '0%';
+                        }, 2000);
+                    }
+                } else {
+                    showToast('Upload gagal!', 'danger');
+                    progressContainer.style.display = 'none';
+                }
+            };
+
+            xhr.open('POST', `https://api.telegram.org/bot${BOT_TOKEN}/sendDocument`);
+            xhr.send(formData);
+        } catch (error) {
+            showToast('Error: ' + error.message, 'danger');
+            progressContainer.style.display = 'none';
+        }
+    }
+
+    function filterFiles() {
+        searchQuery = document.getElementById('searchInput').value.toLowerCase();
+        renderFiles();
+    }
+
+    function renderFiles() {
+        const content = document.getElementById('fileListContent');
+        const fileCount = document.getElementById('fileCount');
+        const totalSize = document.getElementById('totalSize');
+
+        let filteredFiles = files;
+        if (currentFolder !== 'all') filteredFiles = filteredFiles.filter(f => f.folder === currentFolder);
+        if (searchQuery) filteredFiles = filteredFiles.filter(f => f.name.toLowerCase().includes(searchQuery));
+
+        if (filteredFiles.length === 0) {
+            content.innerHTML = '<div class="empty-state">Tidak ada file ditemukan</div>';
+            fileCount.textContent = '0 file';
+            totalSize.textContent = '0 MB';
+            return;
+        }
+
+        let totalBytes = filteredFiles.reduce((sum, f) => sum + f.size, 0);
+        fileCount.textContent = `${filteredFiles.length} file`;
+        totalSize.textContent = `${(totalBytes / 1024 / 1024).toFixed(2)} MB`;
+
+        let displayFiles = filteredFiles;
+        let isLimited = false;
+        if (currentFolder === 'all' && !searchQuery && filteredFiles.length > 5) {
+            displayFiles = filteredFiles.slice(0, 5);
+            isLimited = true;
+        }
+
+        content.innerHTML = displayFiles.map(file => {
+            const isImage = file.type.startsWith('image/');
+            const isPDF = file.type === 'application/pdf';
+            const canPreview = isImage || isPDF;
+
+            return `
+            <div class="file-item ${selectedFiles.has(file.id) ? 'selected' : ''}">
+                <input type="checkbox" class="checkbox" ${selectedFiles.has(file.id) ? 'checked' : ''} onchange="toggleSelect('${file.id}')">
+                <div class="file-icon" ${canPreview ? `onclick="previewFile('${file.file_id}', '${file.name}', '${file.type}')"` : ''}>
+                    ${isImage ? '🖼️' : getFileIcon(file.name)}
+                </div>
+                <div class="file-info">
+                    <div class="file-name">${file.name}</div>
+                    <div class="file-meta">
+                        <span>${formatSize(file.size)}</span>
+                        <span>${formatDate(file.date)}</span>
+                        ${file.folder ? `<span class="tag">#${file.folder}</span>` : ''}
+                    </div>
+                </div>
+                <div class="file-actions">
+                    ${canPreview ? `<button class="icon-btn" onclick="previewFile('${file.file_id}', '${file.name}', '${file.type}')" title="Preview">👁</button>` : ''}
+                    <button class="icon-btn" onclick="shareFile('${file.file_id}', '${file.name}')" title="Share">🔗</button>
+                    <button class="icon-btn" onclick="downloadFile('${file.file_id}', '${file.name}')" title="Download">⬇</button>
+                    <button class="icon-btn delete" onclick="deleteFile('${file.id}')" title="Hapus">🗑</button>
+                </div>
+            </div>`;
+        }).join('') + (isLimited ? `
+            <div style="padding: 16px 20px; text-align: center; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 14px;">
+                Menampilkan 5 file terbaru dari ${filteredFiles.length} total file.<br>
+                Buka folder spesifik atau gunakan search untuk melihat file lainnya.
+            </div>` : '');
+    }
+
+    function toggleSelect(id) {
+        if (selectedFiles.has(id)) selectedFiles.delete(id);
+        else selectedFiles.add(id);
+        updateBulkActions();
+        renderFiles();
+    }
+
+    function toggleSelectAll() {
+        const checkbox = document.getElementById('selectAll');
+        let filteredFiles = files;
+        if (currentFolder !== 'all') filteredFiles = filteredFiles.filter(f => f.folder === currentFolder);
+        if (searchQuery) filteredFiles = filteredFiles.filter(f => f.name.toLowerCase().includes(searchQuery));
+
+        if (checkbox.checked) filteredFiles.forEach(f => selectedFiles.add(f.id));
+        else selectedFiles.clear();
+
+        updateBulkActions();
+        renderFiles();
+    }
+
+    function updateBulkActions() {
+        const bulk = document.getElementById('bulkActions');
+        const count = document.getElementById('selectedCount');
+        const selectAll = document.getElementById('selectAll');
+
+        if (selectedFiles.size > 0) {
+            bulk.classList.add('show');
+            count.textContent = `${selectedFiles.size} dipilih`;
+        } else {
+            bulk.classList.remove('show');
+        }
+
+        let filtered = files;
+        if (currentFolder !== 'all') filtered = filtered.filter(f => f.folder === currentFolder);
+        if (searchQuery) filtered = filtered.filter(f => f.name.toLowerCase().includes(searchQuery));
+
+        selectAll.checked = filtered.length > 0 && filtered.every(f => selectedFiles.has(f.id));
+    }
+
+    async function bulkDelete() {
+        if (!confirm(`Hapus ${selectedFiles.size} file?`)) return;
+        for (let id of selectedFiles) await deleteDoc(doc(db, "users", currentUser.uid, "files", id));
+        selectedFiles.clear();
+        await loadFilesFromFirestore();
+        updateBulkActions();
+        showToast("File berhasil dihapus");
+    }
+
+    async function previewFile(file_id, fileName, fileType) {
+        try {
+            const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getFile?file_id=${file_id}`);
+            const data = await res.json();
+            if (data.ok) {
+                const fileUrl = `https://api.telegram.org/file/bot${BOT_TOKEN}/${data.result.file_path}`;
+                document.getElementById('previewTitle').textContent = fileName;
+                const body = document.getElementById('previewBody');
+
+                if (fileType.startsWith('image/')) {
+                    body.innerHTML = `<img src="${fileUrl}" alt="${fileName}">`;
+                } else if (fileType === 'application/pdf') {
+                    body.innerHTML = `<iframe src="${fileUrl}"></iframe>`;
+                }
+
+                document.getElementById('previewDownloadBtn').onclick = () => window.open(fileUrl, '_blank');
+                document.getElementById('previewModal').style.display = 'flex';
+            }
+        } catch (e) {
+            showToast('Gagal preview file', 'danger');
+        }
+    }
+
+    async function downloadFile(file_id, fileName) {
+        try {
+            const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getFile?file_id=${file_id}`);
+            const data = await res.json();
+            if (data.ok) {
+                const url = `https://api.telegram.org/file/bot${BOT_TOKEN}/${data.result.file_path}`;
+                window.open(url, '_blank');
+            }
+        } catch (e) {
+            showToast('Gagal download', 'danger');
+        }
+    }
+
+    async function shareFile(file_id, fileName) {
+        try {
+            const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getFile?file_id=${file_id}`);
+            const data = await res.json();
+            if (data.ok) {
+                const url = `https://api.telegram.org/file/bot${BOT_TOKEN}/${data.result.file_path}`;
+                document.getElementById('shareLink').value = url;
+                document.getElementById('shareModal').style.display = 'flex';
+            }
+        } catch (e) {
+            showToast('Gagal generate link', 'danger');
+        }
+    }
+
+    function copyLink() {
+        const input = document.getElementById('shareLink');
+        input.select();
+        navigator.clipboard.writeText(input.value);
+        showToast('Link berhasil dicopy!');
+        closeModal('shareModal');
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).style.display = 'none';
+    }
+
+    async function deleteFile(id) {
+        if (!confirm('Hapus file dari daftar? (File tetap ada di Telegram)')) return;
+        await deleteDoc(doc(db, "users", currentUser.uid, "files", id));
+        selectedFiles.delete(id);
+        await loadFilesFromFirestore();
+        updateBulkActions();
+        showToast("File berhasil dihapus");
+    }
+
+    function getFileIcon(name) {
+        const ext = name.split('.').pop().toLowerCase();
+        const icons = { pdf: 'PDF', doc: 'DOC', docx: 'DOC', xls: 'XLS', xlsx: 'XLS', jpg: 'IMG', jpeg: 'IMG', png: 'IMG', mp4: 'VID', mp3: 'AUD', zip: 'ZIP' };
+        return icons[ext] || 'FILE';
+    }
+
+    function formatSize(bytes) {
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+        return (bytes / 1024 / 1024).toFixed(1) + ' MB';
+    }
+
+    function formatDate(iso) {
+        return new Date(iso).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+
+    async function loadFiles() {
+        await loadFilesFromFirestore();
+        showToast("Daftar file di-refresh");
+    }
+
+    function showToast(message, type = 'success') {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.style.background = type === 'danger' ? 'var(--danger)' : 'var(--success)';
+        toast.style.display = 'block';
+        setTimeout(() => toast.style.display = 'none', 3000);
+    }
+
+    // Export fungsi ke window
+    window.saveConfig = saveConfig;
+    window.selectFolder = selectFolder;
+    window.filterFiles = filterFiles;
+    window.toggleSelect = toggleSelect;
+    window.toggleSelectAll = toggleSelectAll;
+    window.bulkDelete = bulkDelete;
+    window.previewFile = previewFile;
+    window.downloadFile = downloadFile;
+    window.shareFile = shareFile;
+    window.copyLink = copyLink;
+    window.closeModal = closeModal;
+    window.deleteFile = deleteFile;
+    window.loadFiles = loadFiles;
+</script>
+</body>
+</html>
